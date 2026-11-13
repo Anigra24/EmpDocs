@@ -1,0 +1,27 @@
+$kind: http-request
+name: 'Duplicate Employee (409)'
+method: POST
+url: '{{baseUrl}}/api/employees'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "employeeCode": "{{employeeCode}}",
+      "FirstName": "Rahul",
+      "lastName": "Sharma",
+      "email": "{{employeeEmail}}",
+      "phone": "9876543210",
+      "department": "Engineering",
+      "designation": "Software Developer",
+      "salary": 45000,
+      "dateOfJoining": "2025-01-15",
+      "address": {
+        "city": "Delhi",
+        "state": "Delhi",
+        "pincode": "110001"
+      }
+    }

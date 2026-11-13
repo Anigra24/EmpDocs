@@ -1,0 +1,16 @@
+$kind: http-request
+name: Unexpected Upload Field (400)
+method: POST
+url: "{{baseUrl}}/api/employees/{{employeeId}}/documents?wrongField=sample.txt"
+queryParams:
+  - key: wrongField
+    value: sample.txt
+    disabled: false
+    description: ""
+order: 9000
+body:
+  type: formdata
+  content:
+    - type: file
+      key: wrongField
+      src: ""

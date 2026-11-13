@@ -1,0 +1,5 @@
+$kind: http-request
+name: Download Document
+method: GET
+url: '{{baseUrl}}/api/documents/{{documentId}}/download'
+order: 1000

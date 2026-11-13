@@ -1,0 +1,9 @@
+$kind: collection
+name: EmpDocs API
+description: Postman collection for testing employee and document management APIs.
+variables:
+  baseUrl: http://localhost:5000
+  employeeId: ""
+  documentId: ""
+  employeeCode: ""
+  employeeEmail: ""

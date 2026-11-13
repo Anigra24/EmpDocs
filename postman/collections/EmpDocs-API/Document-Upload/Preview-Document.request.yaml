@@ -1,0 +1,5 @@
+$kind: http-request
+name: Preview Document
+method: GET
+url: '{{baseUrl}}/api/employees/{{documentId}}/content'
+order: 4000

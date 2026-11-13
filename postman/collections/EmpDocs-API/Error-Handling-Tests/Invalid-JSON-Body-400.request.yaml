@@ -1,0 +1,11 @@
+$kind: http-request
+name: 'Invalid JSON Body (400)'
+method: POST
+url: '{{baseUrl}}/api/employees'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: text
+  content: '{ invalid json }'

@@ -1,0 +1,26 @@
+$kind: http-request
+name: Upload Multiple Documents
+method: POST
+url: "{{baseUrl}}/api/employees/{{employeeId}}/documents/bulk?document=sample.txt&documents=sample.csv"
+queryParams:
+  - key: document
+    value: sample.txt
+    disabled: false
+    description: ""
+  - key: documents
+    value: sample.csv
+    disabled: false
+    description: ""
+order: 2000
+body:
+  type: formdata
+  content:
+    - type: file
+      key: documents
+      src: ""
+    - type: file
+      key: documents
+      src: ""
+    - type: text
+      key: category
+      value: Employee Records

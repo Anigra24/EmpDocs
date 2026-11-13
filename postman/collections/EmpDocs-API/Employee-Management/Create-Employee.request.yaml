@@ -1,0 +1,47 @@
+$kind: http-request
+name: Create Employee
+method: POST
+url: '{{baseUrl}}/api/employees'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "employeeCode": "{{employeeCode}}",
+      "FirstName": "Rahul",
+      "lastName": "Sharma",
+      "email": "{{employeeEmail}}",
+      "phone": "9876543210",
+      "department": "Engineering",
+      "designation": "Software Developer",
+      "salary": 45000,
+      "dateOfJoining": "2025-01-15",
+      "address": {
+        "city": "Delhi",
+        "state": "Delhi",
+        "pincode": "110001"
+      },
+      "isActive": true
+    }
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      const code = Math.floor(1000 + Math.random() * 9000);
+      pm.collectionVariables.set('employeeCode', 'EMP' + code);
+      pm.collectionVariables.set('employeeEmail', 'employee' + code + '@example.com');
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Employee created successfully', function () {
+          pm.response.to.have.status(201);
+      });
+      if (pm.response.code === 201) {
+          const body = pm.response.json();
+          if (body.data && body.data._id) {
+              pm.collectionVariables.set('employeeId', body.data._id);
+          }
+      }

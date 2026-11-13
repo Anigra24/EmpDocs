@@ -1,0 +1,16 @@
+$kind: http-request
+name: Unsupported File Type (415)
+method: POST
+url: "{{baseUrl}}/api/employees/{{employeeId}}/documents?document=rejected-file.docx"
+queryParams:
+  - key: document
+    value: rejected-file.docx
+    disabled: false
+    description: ""
+order: 7000
+body:
+  type: formdata
+  content:
+    - type: file
+      key: document
+      src: ""

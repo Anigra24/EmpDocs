@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'Invalid Document ID (400)'
+method: GET
+url: '{{baseUrl}}/api/documents/invalid-id/download'
+order: 5000

@@ -1,0 +1,32 @@
+$kind: http-request
+name: Upload Single Document
+method: POST
+url: "{{baseUrl}}/api/employees/{{employeeId}}/documents?document=C:\\Practise\\empdocs\\sample-files\\sample.txt"
+queryParams:
+  - key: document
+    value: C:\Practise\empdocs\sample-files\sample.txt
+    disabled: false
+    description: ""
+order: 1000
+body:
+  type: formdata
+  content:
+    - type: file
+      key: document
+      src: ""
+    - type: text
+      key: category
+      value: Joining Documents
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Document uploaded successfully', function () {
+          pm.response.to.have.status(201);
+      });
+      if (pm.response.code === 201) {
+          const body = pm.response.json();
+          if (body.data && body.data._id) {
+              pm.collectionVariables.set('documentId', body.data._id);
+          }
+      }
+    language: text/javascript

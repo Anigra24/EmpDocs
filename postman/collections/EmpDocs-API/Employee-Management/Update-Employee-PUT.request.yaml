@@ -1,0 +1,28 @@
+$kind: http-request
+name: 'Update Employee (PUT)'
+method: PUT
+url: '{{baseUrl}}/api/employees/{{employeeId}}'
+order: 5000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "employeeCode": "{{employeeCode}}",
+      "FirstName": "Rahul",
+      "lastName": "Sharma",
+      "email": "{{employeeEmail}}",
+      "phone": "9876543210",
+      "department": "Engineering",
+      "designation": "Senior Developer",
+      "salary": 55000,
+      "dateOfJoining": "2025-01-15",
+      "address": {
+        "city": "Delhi",
+        "state": "Delhi",
+        "pincode": "110001"
+      },
+      "isActive": true
+    }

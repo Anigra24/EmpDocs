@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'Employee Not Found (404)'
+method: GET
+url: '{{baseUrl}}/api/employees/507f1f77bcf86cd799439011'
+order: 2000

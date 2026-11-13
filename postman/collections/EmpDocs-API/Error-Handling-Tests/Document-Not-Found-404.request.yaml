@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'Document Not Found (404)'
+method: GET
+url: '{{baseUrl}}/api/documents/507f1f77bcf86cd799439011/download'
+order: 6000

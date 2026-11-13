@@ -1,0 +1,320 @@
+
+{
+  "info": {
+    "name": "EmpDocs API",
+    "description": "API testing collection for EmpDocs employee and document management.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "employeeId", "value": "" },
+    { "key": "documentId", "value": "" },
+    { "key": "employeeCode", "value": "" },
+    { "key": "employeeEmail", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Check Server Health",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employee Management",
+      "item": [
+        {
+          "name": "Create Employee",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const code = Math.floor(1000 + Math.random() * 9000);",
+                  "pm.collectionVariables.set('employeeCode', 'EMP' + code);",
+                  "pm.collectionVariables.set('employeeEmail', 'employee' + code + '@example.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Employee created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.data && body.data._id) {",
+                  "        pm.collectionVariables.set('employeeId', body.data._id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeCode\": \"{{employeeCode}}\",\n  \"FirstName\": \"Rahul\",\n  \"lastName\": \"Sharma\",\n  \"email\": \"{{employeeEmail}}\",\n  \"phone\": \"9876543210\",\n  \"department\": \"Engineering\",\n  \"designation\": \"Software Developer\",\n  \"salary\": 45000,\n  \"dateOfJoining\": \"2025-01-15\",\n  \"address\": {\n    \"street\": \"MG Road\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"pincode\": \"110001\",\n    \"country\": \"India\"\n  },\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/employees"
+          }
+        },
+        {
+          "name": "Get All Employees",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/employees?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Search and Filter Employees",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/employees?search=Rahul&department=Engineering&isActive=true&sort=FirstName"
+          }
+        },
+        {
+          "name": "Get Employee By ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/employees/{{employeeId}}"
+          }
+        },
+        {
+          "name": "Update Employee (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeCode\": \"{{employeeCode}}\",\n  \"FirstName\": \"Rahul\",\n  \"lastName\": \"Sharma\",\n  \"email\": \"{{employeeEmail}}\",\n  \"phone\": \"9876543210\",\n  \"department\": \"Engineering\",\n  \"designation\": \"Senior Developer\",\n  \"salary\": 55000,\n  \"dateOfJoining\": \"2025-01-15\",\n  \"address\": {\n    \"street\": \"MG Road\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"pincode\": \"110001\",\n    \"country\": \"India\"\n  },\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/employees/{{employeeId}}"
+          }
+        },
+        {
+          "name": "Update Employee (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designation\": \"Team Lead\"\n}"
+            },
+            "url": "{{baseUrl}}/api/employees/{{employeeId}}"
+          }
+        },
+        {
+          "name": "Delete Employee",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/employees/{{employeeId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Document Upload",
+      "item": [
+        {
+          "name": "Upload Single Document",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Document uploaded successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.data && body.data._id) {",
+                  "        pm.collectionVariables.set('documentId', body.data._id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "document", "type": "file" },
+                { "key": "category", "value": "Joining Documents", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/employees/{{employeeId}}/documents"
+          }
+        },
+        {
+          "name": "Upload Multiple Documents",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "documents", "type": "file" },
+                { "key": "documents", "type": "file" },
+                { "key": "category", "value": "Employee Records", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/employees/{{employeeId}}/documents/bulk"
+          }
+        },
+        {
+          "name": "Get Employee Documents",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/employees/{{employeeId}}/documents"
+          }
+        },
+        {
+          "name": "Preview Document",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/employees/{{documentId}}/content"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Document Management",
+      "item": [
+        {
+          "name": "Download Document",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/documents/{{documentId}}/download"
+          }
+        },
+        {
+          "name": "Delete Document",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/documents/{{documentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Handling Tests",
+      "item": [
+        {
+          "name": "Invalid Employee ID (400)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/employees/invalid-id"
+          }
+        },
+        {
+          "name": "Employee Not Found (404)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/employees/507f1f77bcf86cd799439011"
+          }
+        },
+        {
+          "name": "Invalid JSON Body (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ invalid json }"
+            },
+            "url": "{{baseUrl}}/api/employees"
+          }
+        },
+        {
+          "name": "Duplicate Employee (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeCode\": \"{{employeeCode}}\",\n  \"FirstName\": \"Rahul\",\n  \"lastName\": \"Sharma\",\n  \"email\": \"{{employeeEmail}}\",\n  \"phone\": \"9876543210\",\n  \"department\": \"Engineering\",\n  \"designation\": \"Software Developer\",\n  \"salary\": 45000,\n  \"dateOfJoining\": \"2025-01-15\",\n  \"address\": {\n    \"street\": \"MG Road\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"pincode\": \"110001\",\n    \"country\": \"India\"\n  },\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/employees"
+          }
+        },
+        {
+          "name": "Invalid Document ID (400)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/documents/invalid-id/download"
+          }
+        },
+        {
+          "name": "Document Not Found (404)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/documents/507f1f77bcf86cd799439011/download"
+          }
+        },
+        {
+          "name": "Unsupported File Type (415)",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "document", "type": "file" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/employees/{{employeeId}}/documents"
+          }
+        },
+        {
+          "name": "File Too Large (413)",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "document", "type": "file" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/employees/{{employeeId}}/documents"
+          }
+        },
+        {
+          "name": "Unexpected Upload Field (400)",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "wrongField", "type": "file" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/employees/{{employeeId}}/documents"
+          }
+        }
+      ]
+    }
+  ]
+}

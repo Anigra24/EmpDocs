@@ -1,0 +1,14 @@
+$kind: http-request
+name: Search and Filter Employees
+method: GET
+url: '{{baseUrl}}/api/employees?search=Rahul&department=Engineering&isActive=true&sort=FirstName'
+order: 3000
+queryParams:
+  - key: search
+    value: Rahul
+  - key: department
+    value: Engineering
+  - key: isActive
+    value: 'true'
+  - key: sort
+    value: FirstName

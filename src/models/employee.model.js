@@ -11,7 +11,7 @@ const employeeSchema = new mongoose.Schema(
             match:[/^EMP\d{4}$/,'Format to be followed: [EMPxxxx]']
         },
 
-        FirstName:{
+        firstName:{
             type:String,
             required: [true, 'First Name is required'],
             trim: true,
