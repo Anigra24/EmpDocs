@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 
+const employeeRoutes = require('./routes/employee.routes');
+const errorHandler = require('./middlewares/error.middleware');
 const app = express();
 
 app.use(express.json());
@@ -32,11 +34,15 @@ app.get('/api/health', (req,res)=>{
     });
 });
 
+app.use('/api/employees', employeeRoutes);
+
 app.use((req,res)=>{
     res.status(404).json({
         success: false,
         message: 'Route not found'
     });
 });
+
+app.use(errorHandler);
 
 module.exports = app;
