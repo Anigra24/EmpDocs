@@ -1,0 +1,5 @@
+Employee Document Sample
+Employee Name: Rahul Sharma
+Department: IT
+Document Type: Sample Text
+This file is used to test TXT preview functionality.
