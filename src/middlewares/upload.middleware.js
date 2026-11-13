@@ -1,4 +1,4 @@
-const mutler = require('mutler');
+const multer = require('multer');
 const path = require('path');
 const fs = require('fs/promises');
 const crypto = require('crypto');
@@ -7,7 +7,7 @@ const MAX_FILE_SIZE = 2 *1024*1024;
 
 const allowedExtensions = ['.pdf','.jpg','.jpeg','png','.txt','.csv'];
 
-const storage = mutler.diskStorage({
+const storage = multer.diskStorage({
     destination: async(requestAnimationFrame,File,callback)=>{
         try{
             const employerFolder = path.join(
@@ -44,7 +44,7 @@ const fileFilter = (req,file,callback)=>{
     callback(null,true);
 };
 
-const upload = mutler({
+const upload = multer({
     storage,
     fileFilter,
     limits:{
@@ -53,7 +53,7 @@ const upload = mutler({
     }
 });
 
-const removeUPloadedFiles = async(req)=>{
+const removeUploadedFiles = async(req)=>{
     const files = [
         ...(req.files || []),
         ...MAX_FILE_SIZE(req.file ? [req.file]: [])
@@ -67,7 +67,7 @@ const removeUPloadedFiles = async(req)=>{
 const runUpload = (middleware)=> (req,res,nest)=>{
     middleware(req,res,async(error) =>{
         if(error){
-            await removeUPloadedFiles(req);
+            await removeUploadedFiles(req);
             return next(error);
         }
 
@@ -75,4 +75,4 @@ const runUpload = (middleware)=> (req,res,nest)=>{
     });
 };
 exports.uploadSingleDocument = runUpload(upload.single('document'));
-exports.uploadMultipleDocument = runUpload(upload.array('document',5));
+exports.uploadMultipleDocuments = runUpload(upload.array('document',5));

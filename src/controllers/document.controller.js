@@ -1,3 +1,4 @@
+
 const fs = require('fs/promises');
 const path = require('path');
 const { parse } = require('csv-parse/sync');
@@ -8,12 +9,18 @@ const Document = require('../models/document.model');
 const projectRoot = path.resolve(__dirname, '../../');
 const uploadsRoot = path.resolve(projectRoot, 'uploads');
 
-const getSafeFilePath = (document) =>{
+const getSafeFilePath = (document) => {
     const absolutePath = path.resolve(projectRoot, document.path);
     const relativePath = path.relative(uploadsRoot, absolutePath);
 
-    if(!relativePath || relativePath.startsWith('..')||path.isAbsolute(relativePath)){
-        throw new Error('Invalid document storage path');
+    if (
+        !relativePath ||
+        relativePath.startsWith('..') ||
+        path.isAbsolute(relativePath)
+    ) {
+        const error = new Error('Invalid document storage path');
+        error.statusCode = 500;
+        throw error;
     }
 
     return absolutePath;
@@ -23,7 +30,9 @@ const removeFile = async (filePath) => {
     try {
         await fs.unlink(filePath);
     } catch (error) {
-        if (error.code !== 'ENOENT') throw error;
+        if (error.code !== 'ENOENT') {
+            throw error;
+        }
     }
 };
 
@@ -37,8 +46,10 @@ const ensureFileExists = async (filePath, res) => {
                 success: false,
                 message: 'Document record exists, but the file is missing from server storage'
             });
+
             return false;
         }
+
         throw error;
     }
 };
@@ -71,6 +82,7 @@ exports.uploadDocument = async (req, res, next) => {
         }
 
         const file = req.file;
+
         const documentData = {
             employee: req.employee._id,
             originalName: path.basename(file.originalname),
@@ -139,66 +151,37 @@ exports.uploadBulkDocuments = async (req, res, next) => {
         });
     } catch (error) {
         await Promise.allSettled(
-            savedDocuments.map((document)=> document.deleteOne())
+            savedDocuments.map((document) => document.deleteOne())
         );
 
         await Promise.allSettled(
-            uploadedFiles.map((file)=>removeFile(file.path))
+            uploadedFiles.map((file) => removeFile(file.path))
         );
 
         next(error);
     }
 };
 
-exports.getEmployeeDocuments = async(req,res,next)=>{
-    try{
-        const documents = (await Document.find({employee: req.employee._id})).toSorted({createdAt:-1});
+exports.getEmployeeDocuments = async (req, res, next) => {
+    try {
+        const documents = await Document.find({
+            employee: req.employee._id
+        }).sort({ createdAt: -1 });
 
         return res.status(200).json({
-            success:true,
+            success: true,
             data: documents,
             count: documents.length
         });
-    }catch(error){
-        next(error);
-    }
-};
-exports.downloadDocument = async (req,res,next)=>{
-    try{
-        const document = await Document.findById(req.params.docId);
-
-        if(!document){
-            return res.status(404).json({
-                success: false,
-                message:'Document not found'
-            });
-        }
-
-        const filePath = getSafeFilePath(document);
-
-        if(!(await ensureFileExists(filePath,res)))return;
-
-        res.setHeader(
-            'content-Type',
-            document.mimeType || 'application/octet-stream'
-        );
-
-        return res.download(
-            filePath,
-            path.basename(document.originalName),
-            (error)=>{
-                if(error && !res.headerSent) next(error);
-            }
-        );
-    }catch(error){
+    } catch (error) {
         next(error);
     }
 };
 
-exports.getDocumentContent = async (req,res,next)=>{
-    try{
+exports.downloadDocument = async (req, res, next) => {
+    try {
         const document = await Document.findById(req.params.docId);
-       
+
         if (!document) {
             return res.status(404).json({
                 success: false,
@@ -206,7 +189,45 @@ exports.getDocumentContent = async (req,res,next)=>{
             });
         }
 
-        const extension = path.extname(document.originalName).toLowerCase();
+        const filePath = getSafeFilePath(document);
+
+        if (!(await ensureFileExists(filePath, res))) {
+            return;
+        }
+
+        res.setHeader(
+            'Content-Type',
+            document.mimeType || 'application/octet-stream'
+        );
+
+        return res.download(
+            filePath,
+            path.basename(document.originalName),
+            (error) => {
+                if (error && !res.headersSent) {
+                    next(error);
+                }
+            }
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getDocumentContent = async (req, res, next) => {
+    try {
+        const document = await Document.findById(req.params.docId);
+
+        if (!document) {
+            return res.status(404).json({
+                success: false,
+                message: 'Document not found'
+            });
+        }
+
+        const extension = path.extname(
+            document.originalName
+        ).toLowerCase();
 
         if (!['.txt', '.csv'].includes(extension)) {
             return res.status(415).json({
@@ -217,7 +238,9 @@ exports.getDocumentContent = async (req,res,next)=>{
 
         const filePath = getSafeFilePath(document);
 
-        if (!(await ensureFileExists(filePath, res))) return;
+        if (!(await ensureFileExists(filePath, res))) {
+            return;
+        }
 
         const content = await fs.readFile(filePath, 'utf8');
 
@@ -259,8 +282,8 @@ exports.getDocumentContent = async (req,res,next)=>{
     }
 };
 
-exports.deleteDocument = async(req,res,next)=>{
-    try{
+exports.deleteDocument = async (req, res, next) => {
+    try {
         const document = await Document.findById(req.params.docId);
 
         if (!document) {
@@ -272,17 +295,21 @@ exports.deleteDocument = async(req,res,next)=>{
 
         const filePath = getSafeFilePath(document);
 
-        if (!(await ensureFileExists(filePath, res))) return;
+        if (!(await ensureFileExists(filePath, res))) {
+            return;
+        }
 
         await fs.unlink(filePath);
         await document.deleteOne();
 
         return res.status(200).json({
             success: true,
-            message:' document and file deletion successful',
-            data:{ documentId: document._id}
+            message: 'Document and file deleted successfully',
+            data: {
+                documentId: document._id
+            }
         });
-    }catch(error){
+    } catch (error) {
         next(error);
     }
 };
