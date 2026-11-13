@@ -8,16 +8,25 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 app.get('/api/health', (req,res)=>{
-    const dbstate = mongoose.connection.readyState;
+    const dbState = mongoose.connection.readyState;
 
-    const databasestatus = dbstate ===1 ? 'connected' : 'disconnected';
+    const dbStates = {
+        0:'disconnected',
+        1:'connected',
+        2:'connecting',
+        3:'disconnecting'
+    };
 
-    res.status(200).json({
-        success: true,
-        message:"server is healthy",
+    const databaseStatus = dbStates[dbState] || 'unknown';
+
+    const isConnected = dbState === 1;
+
+    res.status(isConnected ? 200 : 503).json({
+        success: isConnected,
+        message: isConnected ? "server is healthy": "database is unavailable",
         data:{
             uptime: Number(process.uptime().toFixed(2)),
-            databse: databasestatus,
+            databse: databaseStatus,
             timestamp: new Date().toISOString()
         }
     });
